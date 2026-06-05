@@ -1,4 +1,4 @@
 :HL["/BrainQuest/_next/static/chunks/0y793i2l4gsgk.css","style"]
 :HL["/BrainQuest/_next/static/media/07454f8ad8aaac57-s.p.2kjei9psvcorz.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/BrainQuest/_next/static/media/e6d00ff86ef9e699-s.p.1vcas2uk12q5a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"Yay_H7dieRPsDJDRK8oLm"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"2wPlNAA_4btFSB3pOigtq"}
