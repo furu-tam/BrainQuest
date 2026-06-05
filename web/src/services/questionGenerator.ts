@@ -49,9 +49,10 @@ function generatePattern(difficulty: Difficulty, age: number): PatternQuestion {
   for (let i = 0; i < repeats; i++) sequence.push(...unit);
   const answer = unit[sequence.length % unit.length];
 
+  const shownItems = [...new Set(sequence)];
   const distractors = pickRandom(
-    SHAPES.filter((s) => s !== answer),
-    2
+    shownItems.filter((s) => s !== answer),
+    Math.min(2, shownItems.length - 1)
   );
   const options = shuffle([answer, ...distractors]);
 
