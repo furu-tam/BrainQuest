@@ -20,7 +20,11 @@ export default function HomePage() {
     resetDailyIfNewDay();
   }, [resetDailyIfNewDay]);
 
-  const { xp, coins, level, streak, dailyProgress, dailyComplete, todayWrongQuestions } = profile;
+  const { xp, coins, level, streak, dailyProgress, dailyComplete } = profile;
+  const todayWrongQuestions = profile.todayWrongQuestions ?? [];
+  const towerConqueredFloors = profile.towerConqueredFloors ?? [];
+  const towerCurrentFloor = profile.towerCurrentFloor ?? 1;
+  const towerBestFloor = profile.towerBestFloor ?? 1;
   const done = dailyTotalProgress(dailyProgress);
   const pct = Math.round((done / DAILY_MISSION_TOTAL) * 100);
   const recommendation = getPathRecommendation(profile);
@@ -108,17 +112,17 @@ export default function HomePage() {
             <div className="mb-2 flex items-center justify-between">
               <h3 className="font-extrabold text-bq-primary">🏰 Mode Leo Tháp</h3>
               <span className="text-sm font-bold text-bq-muted">
-                Kỷ lục: tầng {Math.max(1, profile.towerBestFloor - 1)}
+                Kỷ lục: tầng {Math.max(1, towerBestFloor - 1)}
               </span>
             </div>
             <p className="text-sm text-bq-muted">
-              Chinh phục {profile.towerConqueredFloors.length} cửa trong lượt hiện tại.
+              Chinh phục {towerConqueredFloors.length} cửa trong lượt hiện tại.
             </p>
             <Link
               href="/tower"
               className="mt-3 flex min-h-[60px] items-center justify-center rounded-bq bg-gradient-to-br from-amber-500 to-orange-400 text-lg font-extrabold text-white"
             >
-              Leo tháp: tầng {profile.towerCurrentFloor}
+              Leo tháp: tầng {towerCurrentFloor}
             </Link>
           </div>
 

@@ -48,6 +48,29 @@ function levelFromXp(xp: number) {
   return Math.floor(xp / 100) + 1;
 }
 
+/** Bổ sung field mặc định cho profile cũ trong localStorage */
+function normalizeProfile(profile: ChildProfile): ChildProfile {
+  const age = profile.age ?? 6;
+  const diff = initialDifficultyForAge(age);
+  return {
+    ...profile,
+    age,
+    dailyProgress: profile.dailyProgress ?? { pattern: 0, memory: 0, logic: 0 },
+    dailyComplete: profile.dailyComplete ?? false,
+    dailyCompleteCount: profile.dailyCompleteCount ?? 0,
+    todayWrongQuestions: profile.todayWrongQuestions ?? [],
+    towerCurrentFloor: profile.towerCurrentFloor ?? 1,
+    towerBestFloor: profile.towerBestFloor ?? 1,
+    towerConqueredFloors: profile.towerConqueredFloors ?? [],
+    events: profile.events ?? [],
+    skillDifficulty: profile.skillDifficulty ?? {
+      pattern: diff,
+      memory: diff,
+      logic: diff,
+    },
+  };
+}
+
 function createDefaultProfile(name = "Bé Minh", age = 6): ChildProfile {
   const diff = initialDifficultyForAge(age);
   return {
@@ -139,10 +162,10 @@ export const useAppStore = create<AppState>()(
 
         getActiveProfile: () => {
           const state = get();
-          return (
+          const raw =
             state.profiles.find((p) => p.id === state.activeProfileId) ??
-            state.profiles[0]
-          );
+            state.profiles[0];
+          return normalizeProfile(raw);
         },
 
         addProfile: (name, age, avatar) => {
@@ -209,7 +232,7 @@ export const useAppStore = create<AppState>()(
         },
 
         getTodayWrongQuestions: () => {
-          return get().getActiveProfile().todayWrongQuestions;
+          return get().getActiveProfile().todayWrongQuestions ?? [];
         },
 
         resolveWrongQuestion: (questionId) => {
@@ -217,7 +240,7 @@ export const useAppStore = create<AppState>()(
           set((s) => ({
             profiles: updateProfileInList(s.profiles, profile.id, (p) => ({
               ...p,
-              todayWrongQuestions: p.todayWrongQuestions.filter((q) => q.id !== questionId),
+              todayWrongQuestions: (p.todayWrongQuestions ?? []).filter((q) => q.id !== questionId),
             })),
           }));
         },
@@ -261,7 +284,7 @@ export const useAppStore = create<AppState>()(
               level: levelFromXp(newXp),
               todayWrongQuestions: shouldAddWrong
                 ? [
-                    ...p.todayWrongQuestions,
+                    ...(p.todayWrongQuestions ?? []),
                     {
                       id: crypto.randomUUID(),
                       game,
@@ -270,8 +293,8 @@ export const useAppStore = create<AppState>()(
                     },
                   ]
                 : correct && reviewQuestionId
-                  ? p.todayWrongQuestions.filter((q) => q.id !== reviewQuestionId)
-                  : p.todayWrongQuestions,
+                  ? (p.todayWrongQuestions ?? []).filter((q) => q.id !== reviewQuestionId)
+                  : (p.todayWrongQuestions ?? []),
               skillDifficulty: {
                 ...p.skillDifficulty,
                 [game]: newDifficulty,
@@ -316,26 +339,29 @@ export const useAppStore = create<AppState>()(
 
           set((s) => ({
             profiles: updateProfileInList(s.profiles, profile.id, (p) => {
+              const normalized = normalizeProfile(p);
               if (correct) {
-                const conquered = p.towerConqueredFloors.includes(p.towerCurrentFloor)
-                  ? p.towerConqueredFloors
-                  : [...p.towerConqueredFloors, p.towerCurrentFloor];
-                const nextFloor = p.towerCurrentFloor + 1;
+                const conquered = normalized.towerConqueredFloors.includes(
+                  normalized.towerCurrentFloor
+                )
+                  ? normalized.towerConqueredFloors
+                  : [...normalized.towerConqueredFloors, normalized.towerCurrentFloor];
+                const nextFloor = normalized.towerCurrentFloor + 1;
                 return {
-                  ...p,
-                  events: [...p.events, event],
+                  ...normalized,
+                  events: [...normalized.events, event],
                   xp: newXp,
-                  coins: p.coins + coinGain,
+                  coins: normalized.coins + coinGain,
                   level: levelFromXp(newXp),
                   towerConqueredFloors: conquered,
                   towerCurrentFloor: nextFloor,
-                  towerBestFloor: Math.max(p.towerBestFloor, nextFloor),
+                  towerBestFloor: Math.max(normalized.towerBestFloor, nextFloor),
                 };
               }
 
               return {
-                ...p,
-                events: [...p.events, event],
+                ...normalized,
+                events: [...normalized.events, event],
                 towerCurrentFloor: 1,
                 towerConqueredFloors: [],
               };
@@ -344,7 +370,24 @@ export const useAppStore = create<AppState>()(
         },
       };
     },
-    { name: "brainquest-v2" }
+    {
+      name: "brainquest-v2",
+      version: 2,
+      migrate: (persisted) => {
+        const state = persisted as AppState;
+        return {
+          ...state,
+          profiles: (state.profiles ?? []).map((p) => normalizeProfile(p)),
+        };
+      },
+      merge: (persisted, current) => {
+        const merged = { ...current, ...(persisted as object) } as AppState;
+        return {
+          ...merged,
+          profiles: (merged.profiles ?? []).map((p) => normalizeProfile(p)),
+        };
+      },
+    }
   )
 );
 

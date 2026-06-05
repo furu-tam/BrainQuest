@@ -30,7 +30,9 @@ export default function TowerPage() {
   const [question, setQuestion] = useState<Question | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const floor = profile.towerCurrentFloor;
+  const floor = profile.towerCurrentFloor ?? 1;
+  const conqueredFloors = profile.towerConqueredFloors ?? [];
+  const bestFloor = profile.towerBestFloor ?? 1;
   const game = useMemo(() => gameByFloor(floor), [floor]);
   const difficulty = useMemo(() => difficultyByFloor(floor), [floor]);
 
@@ -71,7 +73,7 @@ export default function TowerPage() {
         </div>
         <main className="flex flex-1 flex-col px-4 pb-5">
           <div className="mb-4 rounded-bq-sm bg-indigo-50 px-3 py-2 text-sm font-bold text-bq-primary">
-            🏰 Đã chinh phục: {profile.towerConqueredFloors.length} cửa · Kỷ lục: tầng {Math.max(1, profile.towerBestFloor - 1)}
+            🏰 Đã chinh phục: {conqueredFloors.length} cửa · Kỷ lục: tầng {Math.max(1, bestFloor - 1)}
           </div>
 
           {loading || !question ? (
