@@ -73,11 +73,10 @@ jobs:
           git push
 
       - name: Deploy to gh-pages branch
-        working-directory: .
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./web/out
+          publish_dir: ./out
           force_orphan: true
 
   deploy:
