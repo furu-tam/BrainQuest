@@ -130,15 +130,5 @@ export async function generateQuestionWithAI(
   difficulty: Difficulty,
   age: number
 ): Promise<Question> {
-  try {
-    const res = await fetch("/api/generate-question", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ game, difficulty, age }),
-    });
-    if (res.ok) return (await res.json()) as Question;
-  } catch {
-    /* fallback local */
-  }
   return generateQuestion(game, difficulty, age);
 }
