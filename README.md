@@ -8,7 +8,8 @@
 dailyQuest/
 ├── specs              # MVP specification
 ├── mockup/            # HTML + CSS mockup (6 màn hình)
-└── web/               # Next.js hybrid app
+├── web/               # BrainQuest — luyện tư duy (Next.js)
+└── math-web/          # MathQuest — ôn luyện Toán (Next.js)
     └── src/
         ├── components/   # PatternGame, MemoryGame, LogicGame
         ├── services/     # questionGenerator, learningPath, voice, analytics
@@ -19,10 +20,14 @@ dailyQuest/
 
 ## Chạy app
 
+**BrainQuest (tư duy):**
 ```bash
-cd web
-npm install
-npm run dev
+cd web && npm install && npm run dev
+```
+
+**MathQuest (ôn Toán):**
+```bash
+cd math-web && npm install && npm run dev
 ```
 
 http://localhost:3000
