@@ -87,22 +87,55 @@ function generateMemory(difficulty: Difficulty, age: number): MemoryQuestion {
   };
 }
 
-function generateLogic(difficulty: Difficulty, age: number): LogicQuestion {
+function generateLogic(difficulty: Difficulty, _age: number): LogicQuestion {
   const comparisonCount = difficulty === 1 ? 2 : difficulty === 2 ? 3 : 4;
-  const pool = pickRandom(LOGIC_ANIMALS, comparisonCount + 1);
-  const comparisons: string[] = [];
-  for (let i = 0; i < comparisonCount; i++) {
-    comparisons.push(`${pool[i]} > ${pool[i + 1]}`);
+  const animalCount = comparisonCount + 1;
+  const animals = pickRandom(LOGIC_ANIMALS, animalCount);
+  const bySize = shuffle(animals);
+  const answer = bySize[0];
+
+  const truePairs: [string, string][] = [];
+  for (let i = 0; i < bySize.length; i++) {
+    for (let j = i + 1; j < bySize.length; j++) {
+      truePairs.push([bySize[i], bySize[j]]);
+    }
   }
-  const answer = pool[0];
-  const others = pool.filter((p) => p !== answer);
+
+  const selected = new Set<string>();
+  const comparisons: string[] = [];
+  const addPair = ([larger, smaller]: [string, string]) => {
+    const key = `${larger}>${smaller}`;
+    if (selected.has(key)) return;
+    selected.add(key);
+    comparisons.push(`${larger} > ${smaller}`);
+  };
+
+  // Đảm bảo suy ra được con lớn nhất (mỗi con nhỏ hơn có ít nhất một so sánh với con lớn hơn nó)
+  for (let i = 1; i < bySize.length; i++) {
+    const largerIdx = Math.floor(Math.random() * i);
+    addPair([bySize[largerIdx], bySize[i]]);
+  }
+
+  // Thêm cặp giữa các con ở giữa để con hiện trên cùng không luôn là lớn nhất
+  const middlePairs = truePairs.filter(([larger]) => larger !== answer);
+  for (const pair of shuffle(middlePairs)) {
+    if (comparisons.length >= comparisonCount) break;
+    addPair(pair);
+  }
+
+  for (const pair of shuffle(truePairs)) {
+    if (comparisons.length >= comparisonCount) break;
+    addPair(pair);
+  }
+
+  const others = animals.filter((a) => a !== answer);
   const distractors = pickRandom(others, Math.min(2, others.length));
   const options = shuffle([answer, ...distractors]);
 
   return {
     type: "logic",
     difficulty,
-    comparisons,
+    comparisons: shuffle(comparisons).slice(0, comparisonCount),
     options,
     answer,
     promptText: "Ai là con lớn nhất?",
