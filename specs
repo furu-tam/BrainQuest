@@ -1,0 +1,807 @@
+# BrainQuest Kids - MVP Specification (Hybrid Web Prototype)
+
+## 1. Product Vision
+
+### Goal
+
+Xây dựng một ứng dụng luyện tư duy cho trẻ từ 3-10 tuổi theo mô hình game hóa.
+
+Khác với các ứng dụng học toán truyền thống, BrainQuest tập trung vào:
+
+* Hình thành thói quen luyện não hằng ngày
+* Tăng khả năng suy luận
+* Tăng khả năng ghi nhớ
+* Tăng khả năng nhận diện quy luật
+* Phát triển tư duy logic
+
+Nguyên tắc:
+
+> 5 phút mỗi ngày - tiến bộ từng chút một.
+
+---
+
+# 2. MVP Objectives
+
+MVP KHÔNG nhằm mục tiêu:
+
+* Dạy toán nâng cao
+* AI cá nhân hóa
+* Mobile App Native
+
+MVP nhằm mục tiêu:
+
+* Kiểm chứng gameplay
+* Kiểm chứng retention
+* Thu thập dữ liệu hành vi trẻ em
+* Tìm hiểu loại game nào hấp dẫn nhất
+
+---
+
+# 3. Target Users
+
+## Children
+
+Age:
+
+```text
+3 - 10 tuổi
+```
+
+Primary Segment:
+
+```text
+4 - 7 tuổi
+```
+
+---
+
+## Parents
+
+Mục tiêu:
+
+* Theo dõi tiến độ
+* Khuyến khích trẻ luyện tập mỗi ngày
+
+---
+
+# 4. Product Scope
+
+## Included
+
+### Home Screen
+
+* Daily Challenge
+* Current Level
+* XP
+* Coins
+* Streak
+
+### Game Modes
+
+* Pattern Recognition
+* Memory Recall
+* Logic Reasoning
+
+### Reward System
+
+* XP
+* Coins
+* Achievement
+
+### Dashboard
+
+* Skill Scores
+* Weekly Progress
+
+---
+
+## Excluded
+
+* Login
+* Payment
+* Subscription
+* Multiplayer
+* AI Tutor
+* Social Features
+
+---
+
+# 5. UX Principles
+
+## Mobile First
+
+Target Width:
+
+```text
+390px
+```
+
+(iPhone 14 width)
+
+---
+
+## Touch Friendly
+
+Minimum Button Size:
+
+```text
+60px
+```
+
+---
+
+## Kid Friendly
+
+Requirements:
+
+* Large icons
+* Bright colors
+* Minimal text
+* Audio support (future)
+* Visual feedback immediately
+
+---
+
+## Session Length
+
+Target:
+
+```text
+3-5 minutes
+```
+
+per session
+
+---
+
+# 6. Core Gameplay Flow
+
+```text
+Home
+ ↓
+Daily Challenge
+ ↓
+Pattern Game
+ ↓
+Memory Game
+ ↓
+Logic Game
+ ↓
+Reward Screen
+ ↓
+Back Home
+```
+
+---
+
+# 7. Home Screen
+
+## Display
+
+### Header
+
+```text
+🧠 BrainQuest
+```
+
+---
+
+### Progress
+
+```text
+Level 5
+XP 120
+Coins 75
+```
+
+---
+
+### Streak
+
+```text
+🔥 3 Days
+```
+
+---
+
+### Main CTA
+
+```text
+[ PLAY TODAY ]
+```
+
+---
+
+# 8. Pattern Game
+
+## Objective
+
+Tìm phần tử tiếp theo trong chuỗi.
+
+---
+
+## Example 1
+
+```text
+🔴 🔵 🔴 🔵 ?
+```
+
+Options:
+
+```text
+🔴
+🟢
+🟡
+```
+
+Answer:
+
+```text
+🔴
+```
+
+---
+
+## Example 2
+
+```text
+⭐ 🌙 ⭐ 🌙 ?
+```
+
+Answer:
+
+```text
+⭐
+```
+
+---
+
+## Difficulty Levels
+
+### Easy
+
+ABAB
+
+---
+
+### Medium
+
+ABCABC
+
+---
+
+### Hard
+
+ABBCABBC
+
+---
+
+## Data Tracking
+
+```json
+{
+  "game":"pattern",
+  "difficulty":3,
+  "correct":true,
+  "responseTime":4.1
+}
+```
+
+---
+
+# 9. Memory Game
+
+## Objective
+
+Nhớ các hình ảnh đã xuất hiện.
+
+---
+
+## Flow
+
+### Step 1
+
+Show:
+
+```text
+🐶 🐱 🐻 🐰
+```
+
+3 seconds
+
+---
+
+### Step 2
+
+Hide
+
+---
+
+### Step 3
+
+Question:
+
+```text
+Which animal did you see?
+```
+
+Options:
+
+```text
+🐶
+🦁
+🐸
+```
+
+---
+
+## Difficulty Levels
+
+### Easy
+
+4 objects
+
+---
+
+### Medium
+
+6 objects
+
+---
+
+### Hard
+
+8 objects
+
+---
+
+## Data Tracking
+
+```json
+{
+  "game":"memory",
+  "difficulty":5,
+  "correct":true,
+  "responseTime":3.8
+}
+```
+
+---
+
+# 10. Logic Game
+
+## Objective
+
+Suy luận từ thông tin cho trước.
+
+---
+
+## Example
+
+```text
+🐘 > 🐶
+
+🐶 > 🐥
+```
+
+Question:
+
+```text
+Who is biggest?
+```
+
+Options:
+
+```text
+🐘
+🐶
+🐥
+```
+
+Answer:
+
+```text
+🐘
+```
+
+---
+
+## Difficulty Levels
+
+### Easy
+
+2 comparisons
+
+### Medium
+
+3 comparisons
+
+### Hard
+
+4+ comparisons
+
+---
+
+## Data Tracking
+
+```json
+{
+  "game":"logic",
+  "difficulty":4,
+  "correct":true,
+  "responseTime":5.2
+}
+```
+
+---
+
+# 11. Daily Challenge System
+
+## Daily Mission
+
+Every day:
+
+```json
+{
+  "pattern":2,
+  "memory":2,
+  "logic":1
+}
+```
+
+Total:
+
+```text
+5 questions/day
+```
+
+---
+
+## Completion Reward
+
+XP:
+
+```text
++50
+```
+
+Coins:
+
+```text
++20
+```
+
+---
+
+# 12. Reward System
+
+## XP
+
+Correct Answer:
+
+```text
++10 XP
+```
+
+---
+
+## Coins
+
+Correct Answer:
+
+```text
++5 Coins
+```
+
+---
+
+## Level Formula
+
+```text
+100 XP = 1 Level
+```
+
+---
+
+## Example
+
+```text
+Level 1 = 0 XP
+Level 2 = 100 XP
+Level 3 = 200 XP
+```
+
+---
+
+# 13. Achievement System
+
+## First Steps
+
+Complete first challenge
+
+---
+
+## Smart Kid
+
+Answer 20 questions correctly
+
+---
+
+## 7-Day Hero
+
+7-day streak
+
+---
+
+## Memory Master
+
+100 memory questions completed
+
+---
+
+# 14. Reward Screen
+
+After mission completed:
+
+Display:
+
+```text
+🎉 Mission Complete
+```
+
+Rewards:
+
+```text
+⭐ +50 XP
+🪙 +20 Coins
+```
+
+Optional:
+
+```text
+Treasure Chest Animation
+```
+
+---
+
+# 15. Data Collection
+
+## Purpose
+
+Validate learning behavior.
+
+---
+
+## Event Structure
+
+```json
+{
+  "timestamp":"2026-06-04T10:00:00Z",
+  "sessionId":"abc123",
+  "game":"pattern",
+  "difficulty":2,
+  "correct":true,
+  "responseTime":4.2
+}
+```
+
+---
+
+## Metrics
+
+### Product Metrics
+
+* Daily Active Users
+* Session Length
+* Daily Completion Rate
+* D1 Retention
+* D7 Retention
+
+---
+
+### Learning Metrics
+
+* Accuracy Rate
+* Average Response Time
+* Skill Progression
+
+---
+
+# 16. Technical Stack
+
+## Frontend
+
+### Framework
+
+```text
+Next.js
+```
+
+### Language
+
+```text
+TypeScript
+```
+
+### Styling
+
+```text
+TailwindCSS
+```
+
+### State Management
+
+```text
+Zustand
+```
+
+---
+
+## PWA
+
+Requirements:
+
+* Installable
+* Offline support
+* Mobile optimized
+
+---
+
+## Backend (Optional MVP)
+
+### Framework
+
+```text
+FastAPI
+```
+
+---
+
+## Database
+
+```text
+PostgreSQL
+```
+
+---
+
+# 17. Folder Structure
+
+```text
+src/
+
+ ├── pages/
+ │
+ ├── components/
+ │
+ │   ├── PatternGame/
+ │   ├── MemoryGame/
+ │   ├── LogicGame/
+ │
+ ├── hooks/
+ │
+ ├── services/
+ │
+ ├── store/
+ │
+ ├── assets/
+ │
+ └── utils/
+```
+
+---
+
+# 18. MVP Success Criteria
+
+## User Testing
+
+At least:
+
+```text
+20 families
+```
+
+---
+
+## Retention
+
+D7 Retention:
+
+```text
+> 30%
+```
+
+---
+
+## Session Length
+
+Average:
+
+```text
+> 3 minutes
+```
+
+---
+
+## Challenge Completion
+
+Target:
+
+```text
+> 70%
+```
+
+---
+
+# 19. Future Phases
+
+## Phase 2
+
+* Adaptive Difficulty
+* Parent Dashboard
+* Child Profiles
+
+---
+
+## Phase 3
+
+* AI Question Generation
+* Personalized Learning Paths
+* Voice Guidance
+
+---
+
+## Phase 4
+
+* Flutter Mobile App
+* Subscription
+* Push Notifications
+
+---
+
+# Final MVP Deliverables
+
+## Screen 1
+
+Home
+
+---
+
+## Screen 2
+
+Pattern Game
+
+---
+
+## Screen 3
+
+Memory Game
+
+---
+
+## Screen 4
+
+Logic Game
+
+---
+
+## Screen 5
+
+Reward Screen
+
+---
+
+## Screen 6
+
+Progress Dashboard
+
+Total:
+
+```text
+6 Screens
+3 Game Engines
+1 Reward System
+1 Analytics System
+```
+
+Đây là phiên bản MVP đủ nhỏ để hoàn thành trong khoảng 4-8 tuần nhưng vẫn đủ dữ liệu để đánh giá retention, engagement và tiềm năng mở rộng thành sản phẩm giáo dục hoàn chỉnh.

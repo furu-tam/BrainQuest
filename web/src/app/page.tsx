@@ -1,0 +1,123 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect } from "react";
+import { AppShell } from "@/components/ui/AppShell";
+import { ProfileBadge } from "@/components/ui/ProfileBadge";
+import { VoiceToggle } from "@/components/ui/VoiceToggle";
+import { getPathRecommendation } from "@/services/learningPath";
+import {
+  DAILY_MISSION_TOTAL,
+  dailyTotalProgress,
+  useAppStore,
+} from "@/store/appStore";
+
+export default function HomePage() {
+  const profile = useAppStore((s) => s.getActiveProfile());
+  const resetDailyIfNewDay = useAppStore((s) => s.resetDailyIfNewDay);
+
+  useEffect(() => {
+    resetDailyIfNewDay();
+  }, [resetDailyIfNewDay]);
+
+  const { xp, coins, level, streak, dailyProgress, dailyComplete } = profile;
+  const done = dailyTotalProgress(dailyProgress);
+  const pct = Math.round((done / DAILY_MISSION_TOTAL) * 100);
+  const recommendation = getPathRecommendation(profile);
+
+  return (
+    <div className="page-wrap">
+      <AppShell activeNav="home">
+        <main className="flex flex-1 flex-col px-4 py-5">
+          <div className="mb-3 flex items-center justify-between">
+            <ProfileBadge />
+            <VoiceToggle />
+          </div>
+
+          <header className="mb-5 text-center">
+            <h1 className="flex items-center justify-center gap-2 text-3xl font-extrabold text-bq-primary">
+              <span>🧠</span> BrainQuest
+            </h1>
+            <p className="mt-1 text-sm text-bq-muted">5 phút mỗi ngày — tiến bộ từng chút!</p>
+          </header>
+
+          <div className="mb-4 grid grid-cols-3 gap-2">
+            {[
+              { label: "Level", value: level },
+              { label: "XP", value: xp },
+              { label: "Coins", value: coins },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="rounded-bq-sm bg-white py-3 text-center shadow-sm"
+              >
+                <div className="text-[0.65rem] font-bold uppercase tracking-wide text-bq-muted">
+                  {s.label}
+                </div>
+                <div className="text-xl font-extrabold text-bq-primary">{s.value}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mb-4 flex items-center justify-center gap-2 rounded-bq bg-gradient-to-r from-bq-accent to-amber-300 py-3.5 font-extrabold text-white shadow-orange">
+            <span className="text-2xl">🔥</span>
+            <span>{streak} ngày liên tiếp!</span>
+          </div>
+
+          <div className="mb-4 rounded-bq-sm bg-indigo-50 px-3 py-2 text-sm font-semibold text-bq-primary">
+            🎯 {recommendation}
+          </div>
+
+          <div className="mb-5">
+            <div className="mb-2 flex justify-between text-sm font-bold">
+              <span>Thử thách hôm nay</span>
+              <span>
+                {done}/{DAILY_MISSION_TOTAL}
+              </span>
+            </div>
+            <div className="h-3.5 overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-teal-400 to-bq-success transition-all"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="mb-5 flex flex-col gap-3">
+            {[
+              { icon: "🔴🔵", title: "Nhận diện quy luật", sub: `${dailyProgress.pattern}/2 câu` },
+              { icon: "🐶🐱", title: "Ghi nhớ", sub: `${dailyProgress.memory}/2 câu` },
+              { icon: "🐘🐶", title: "Suy luận logic", sub: `${dailyProgress.logic}/1 câu` },
+            ].map((m) => (
+              <div
+                key={m.title}
+                className="flex items-center gap-3 rounded-bq-sm bg-white p-3.5 shadow-sm"
+              >
+                <span className="flex h-13 w-13 items-center justify-center rounded-xl bg-amber-100 text-2xl">
+                  {m.icon}
+                </span>
+                <div>
+                  <h3 className="font-extrabold">{m.title}</h3>
+                  <p className="text-sm text-bq-muted">{m.sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {dailyComplete ? (
+            <div className="mt-auto rounded-bq bg-green-100 py-4 text-center font-extrabold text-bq-success">
+              ✅ Đã hoàn thành hôm nay!
+            </div>
+          ) : (
+            <Link
+              href="/play"
+              className="mt-auto flex min-h-[72px] items-center justify-center rounded-bq bg-gradient-to-br from-bq-primary to-indigo-400 text-xl font-extrabold text-white shadow-purple active:scale-[0.97]"
+            >
+              ▶ PLAY TODAY
+            </Link>
+          )}
+        </main>
+      </AppShell>
+    </div>
+  );
+}
