@@ -88,12 +88,13 @@ Next.js 16 · React 19 · TypeScript · Tailwind 4 · Zustand · PWA
 ## Deploy GitHub Pages
 
 1. Push code lên nhánh `main`
-2. Vào GitHub repo → `Settings` → `Pages`:
-   - Source: `GitHub Actions`
-3. Workflow `Deploy Web to GitHub Pages` sẽ tự chạy
-4. URL page:
-   - `https://<github-username>.github.io/<repo-name>/`
+2. Vào GitHub repo → `Settings` → `Pages` và chọn **một** trong hai cách:
+   - **GitHub Actions** (khuyên dùng) — workflow `Deploy Web to GitHub Pages` tự build & deploy
+   - **Deploy from branch** → `main` → folder **`/docs`** (CI cũng commit bản build vào `docs/`)
+3. URL app: `https://furu-tam.github.io/BrainQuest/`
+
+**Nếu thấy README hoặc 404:** Pages đang trỏ sai nguồn (thường là `main /` root). Đổi sang **GitHub Actions** hoặc **`/docs`** như trên.
 
 Lưu ý:
-- App đã cấu hình static export trong `web/next.config.ts`
-- Nếu đổi tên repo, đường dẫn page sẽ đổi theo tên repo mới
+- App dùng static export trong `web/next.config.ts` với `basePath=/BrainQuest` khi build trên CI
+- Đổi tên repo thì URL page đổi theo tên repo mới
