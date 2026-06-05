@@ -20,7 +20,7 @@ export default function HomePage() {
     resetDailyIfNewDay();
   }, [resetDailyIfNewDay]);
 
-  const { xp, coins, level, streak, dailyProgress, dailyComplete } = profile;
+  const { xp, coins, level, streak, dailyProgress, dailyComplete, todayWrongQuestions } = profile;
   const done = dailyTotalProgress(dailyProgress);
   const pct = Math.round((done / DAILY_MISSION_TOTAL) * 100);
   const recommendation = getPathRecommendation(profile);
@@ -104,18 +104,47 @@ export default function HomePage() {
             ))}
           </div>
 
-          {dailyComplete ? (
-            <div className="mt-auto rounded-bq bg-green-100 py-4 text-center font-extrabold text-bq-success">
-              ✅ Đã hoàn thành hôm nay!
+          <div className="mb-5 rounded-bq-sm bg-white p-3.5 shadow-sm">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="font-extrabold text-bq-primary">🏰 Mode Leo Tháp</h3>
+              <span className="text-sm font-bold text-bq-muted">
+                Kỷ lục: tầng {Math.max(1, profile.towerBestFloor - 1)}
+              </span>
             </div>
-          ) : (
+            <p className="text-sm text-bq-muted">
+              Chinh phục {profile.towerConqueredFloors.length} cửa trong lượt hiện tại.
+            </p>
             <Link
-              href="/play"
-              className="mt-auto flex min-h-[72px] items-center justify-center rounded-bq bg-gradient-to-br from-bq-primary to-indigo-400 text-xl font-extrabold text-white shadow-purple active:scale-[0.97]"
+              href="/tower"
+              className="mt-3 flex min-h-[60px] items-center justify-center rounded-bq bg-gradient-to-br from-amber-500 to-orange-400 text-lg font-extrabold text-white"
             >
-              ▶ PLAY TODAY
+              Leo tháp: tầng {profile.towerCurrentFloor}
             </Link>
-          )}
+          </div>
+
+          <div className="mt-auto flex flex-col gap-3">
+            {dailyComplete ? (
+              <div className="rounded-bq bg-green-100 py-4 text-center font-extrabold text-bq-success">
+                ✅ Đã hoàn thành hôm nay!
+              </div>
+            ) : (
+              <Link
+                href="/play"
+                className="flex min-h-[72px] items-center justify-center rounded-bq bg-gradient-to-br from-bq-primary to-indigo-400 text-xl font-extrabold text-white shadow-purple active:scale-[0.97]"
+              >
+                ▶ PLAY TODAY
+              </Link>
+            )}
+
+            {todayWrongQuestions.length > 0 && (
+              <Link
+                href="/review"
+                className="flex min-h-[60px] items-center justify-center rounded-bq border-2 border-bq-accent bg-white text-lg font-extrabold text-bq-accent"
+              >
+                Ôn lại câu sai ({todayWrongQuestions.length})
+              </Link>
+            )}
+          </div>
         </main>
       </AppShell>
     </div>

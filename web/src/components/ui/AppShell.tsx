@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 interface AppShellProps {
   children: ReactNode;
   showNav?: boolean;
-  activeNav?: "home" | "dashboard" | "parent";
+  activeNav?: "home" | "dashboard" | "parent" | "tower";
 }
 
 export function AppShell({ children, showNav = true, activeNav = "home" }: AppShellProps) {
@@ -33,6 +33,13 @@ export function AppShell({ children, showNav = true, activeNav = "home" }: AppSh
           >
             <span className="text-xl">👨‍👩‍👧</span>
             Phụ huynh
+          </Link>
+          <Link
+            href="/tower"
+            className={`flex min-w-12 flex-col items-center gap-1 text-[0.65rem] font-bold ${activeNav === "tower" ? "text-bq-primary" : "text-bq-muted"}`}
+          >
+            <span className="text-xl">🏰</span>
+            Leo tháp
           </Link>
         </nav>
       )}

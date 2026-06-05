@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Difficulty } from "@/types/question";
+import type { Difficulty, Question } from "@/types/question";
 import { initialDifficultyForAge, nextDifficulty } from "@/utils/adaptiveDifficulty";
 
 export type GameType = "pattern" | "memory" | "logic";
@@ -15,6 +15,13 @@ export interface GameEvent {
   responseTime: number;
 }
 
+export interface WrongQuestionItem {
+  id: string;
+  game: GameType;
+  question: Question;
+  createdAt: string;
+}
+
 export interface ChildProfile {
   id: string;
   name: string;
@@ -27,6 +34,10 @@ export interface ChildProfile {
   dailyProgress: { pattern: number; memory: number; logic: number };
   dailyComplete: boolean;
   dailyCompleteCount: number;
+  todayWrongQuestions: WrongQuestionItem[];
+  towerCurrentFloor: number;
+  towerBestFloor: number;
+  towerConqueredFloors: number[];
   events: GameEvent[];
   skillDifficulty: Record<GameType, Difficulty>;
 }
@@ -51,6 +62,10 @@ function createDefaultProfile(name = "Bé Minh", age = 6): ChildProfile {
     dailyProgress: { pattern: 0, memory: 0, logic: 0 },
     dailyComplete: false,
     dailyCompleteCount: 0,
+    todayWrongQuestions: [],
+    towerCurrentFloor: 1,
+    towerBestFloor: 1,
+    towerConqueredFloors: [],
     events: [],
     skillDifficulty: { pattern: diff, memory: diff, logic: diff },
   };
@@ -80,10 +95,20 @@ interface AppState {
     game: GameType,
     correct: boolean,
     responseTime: number,
-    difficulty: Difficulty
+    difficulty: Difficulty,
+    question?: Question,
+    reviewQuestionId?: string
   ) => void;
+  getTodayWrongQuestions: () => WrongQuestionItem[];
+  resolveWrongQuestion: (questionId: string) => void;
   completeDaily: () => void;
   getDifficultyForGame: (game: GameType) => Difficulty;
+  recordTowerAnswer: (
+    game: GameType,
+    correct: boolean,
+    responseTime: number,
+    difficulty: Difficulty
+  ) => void;
 }
 
 function todayKey() {
@@ -172,6 +197,7 @@ export const useAppStore = create<AppState>()(
                 ...p,
                 dailyProgress: { pattern: 0, memory: 0, logic: 0 },
                 dailyComplete: false,
+                todayWrongQuestions: [],
               })),
             }));
           }
@@ -182,7 +208,21 @@ export const useAppStore = create<AppState>()(
           return profile.skillDifficulty[game];
         },
 
-        recordAnswer: (game, correct, responseTime, difficulty) => {
+        getTodayWrongQuestions: () => {
+          return get().getActiveProfile().todayWrongQuestions;
+        },
+
+        resolveWrongQuestion: (questionId) => {
+          const profile = get().getActiveProfile();
+          set((s) => ({
+            profiles: updateProfileInList(s.profiles, profile.id, (p) => ({
+              ...p,
+              todayWrongQuestions: p.todayWrongQuestions.filter((q) => q.id !== questionId),
+            })),
+          }));
+        },
+
+        recordAnswer: (game, correct, responseTime, difficulty, question, reviewQuestionId) => {
           const state = get();
           const profile = state.getActiveProfile();
           const event: GameEvent = {
@@ -209,6 +249,7 @@ export const useAppStore = create<AppState>()(
           const xpGain = correct ? 10 : 0;
           const coinGain = correct ? 5 : 0;
           const newXp = profile.xp + xpGain;
+          const shouldAddWrong = !correct && Boolean(question) && !reviewQuestionId;
 
           set((s) => ({
             profiles: updateProfileInList(s.profiles, profile.id, (p) => ({
@@ -218,6 +259,19 @@ export const useAppStore = create<AppState>()(
               xp: newXp,
               coins: p.coins + coinGain,
               level: levelFromXp(newXp),
+              todayWrongQuestions: shouldAddWrong
+                ? [
+                    ...p.todayWrongQuestions,
+                    {
+                      id: crypto.randomUUID(),
+                      game,
+                      question: question as Question,
+                      createdAt: new Date().toISOString(),
+                    },
+                  ]
+                : correct && reviewQuestionId
+                  ? p.todayWrongQuestions.filter((q) => q.id !== reviewQuestionId)
+                  : p.todayWrongQuestions,
               skillDifficulty: {
                 ...p.skillDifficulty,
                 [game]: newDifficulty,
@@ -240,6 +294,52 @@ export const useAppStore = create<AppState>()(
               level: levelFromXp(p.xp + bonus.xp),
               streak: p.dailyComplete ? p.streak : p.streak + 1,
             })),
+          }));
+        },
+
+        recordTowerAnswer: (game, correct, responseTime, difficulty) => {
+          const state = get();
+          const profile = state.getActiveProfile();
+          const event: GameEvent = {
+            timestamp: new Date().toISOString(),
+            sessionId: state.sessionId,
+            childId: profile.id,
+            game,
+            difficulty,
+            correct,
+            responseTime,
+          };
+
+          const xpGain = correct ? 15 : 0;
+          const coinGain = correct ? 8 : 0;
+          const newXp = profile.xp + xpGain;
+
+          set((s) => ({
+            profiles: updateProfileInList(s.profiles, profile.id, (p) => {
+              if (correct) {
+                const conquered = p.towerConqueredFloors.includes(p.towerCurrentFloor)
+                  ? p.towerConqueredFloors
+                  : [...p.towerConqueredFloors, p.towerCurrentFloor];
+                const nextFloor = p.towerCurrentFloor + 1;
+                return {
+                  ...p,
+                  events: [...p.events, event],
+                  xp: newXp,
+                  coins: p.coins + coinGain,
+                  level: levelFromXp(newXp),
+                  towerConqueredFloors: conquered,
+                  towerCurrentFloor: nextFloor,
+                  towerBestFloor: Math.max(p.towerBestFloor, nextFloor),
+                };
+              }
+
+              return {
+                ...p,
+                events: [...p.events, event],
+                towerCurrentFloor: 1,
+                towerConqueredFloors: [],
+              };
+            }),
           }));
         },
       };

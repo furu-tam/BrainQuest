@@ -55,7 +55,7 @@ export default function PlayPage() {
     (correct: boolean, responseTime: number) => {
       if (!currentStep || !question) return;
       const difficulty = question.difficulty;
-      recordAnswer(currentStep.game, correct, responseTime, difficulty);
+      recordAnswer(currentStep.game, correct, responseTime, difficulty, question);
       const last = useAppStore.getState().getActiveProfile().events.at(-1);
       if (last) trackEvent(last);
 
