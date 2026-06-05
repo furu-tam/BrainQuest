@@ -12,7 +12,7 @@ import { useActiveProfile } from "@/hooks/useActiveProfile";
 import { useVoice } from "@/hooks/useVoice";
 import { trackEvent } from "@/services/analytics";
 import { generateQuestionWithAI } from "@/services/questionGenerator";
-import { VOICE_PROMPTS } from "@/services/voice";
+import { playTrophyFanfare, VOICE_PROMPTS } from "@/services/voice";
 import { useAppStore } from "@/store/appStore";
 import type { Difficulty, GameType, Question } from "@/types/question";
 
@@ -42,6 +42,7 @@ export default function TowerPage() {
   const [loading, setLoading] = useState(true);
   const [fallFromFloor, setFallFromFloor] = useState<number | null>(null);
   const [locked, setLocked] = useState(false);
+  const [recordToast, setRecordToast] = useState<number | null>(null);
   const pendingAnswerRef = useRef<PendingAnswer | null>(null);
 
   const floor = profile.towerCurrentFloor ?? 1;
@@ -94,10 +95,22 @@ export default function TowerPage() {
     }
 
     setLocked(true);
+    const prevBest = profile.towerBestFloor ?? 1;
+    const isNewRecord = floor + 1 > prevBest;
+
     recordTowerAnswer(game, true, responseTime, difficulty);
     const last = useAppStore.getState().getActiveProfile().events.at(-1);
     if (last) trackEvent(last);
-    speak(VOICE_PROMPTS.correct);
+
+    if (isNewRecord) {
+      playTrophyFanfare();
+      speak(VOICE_PROMPTS.towerRecord);
+      setRecordToast(floor);
+      setTimeout(() => setRecordToast(null), 2200);
+    } else {
+      speak(VOICE_PROMPTS.correct);
+    }
+
     setTimeout(() => setLocked(false), 700);
   };
 
@@ -142,6 +155,16 @@ export default function TowerPage() {
               fromFloor={fallFromFloor}
               onComplete={finishWrongAnswer}
             />
+          )}
+
+          {recordToast !== null && (
+            <div className="tower-record-toast" role="status">
+              <span className="tower-record-toast-icon">🏆</span>
+              <div>
+                <p className="tower-record-toast-title">Kỷ lục mới!</p>
+                <p className="tower-record-toast-sub">Tầng {recordToast}</p>
+              </div>
+            </div>
           )}
         </div>
       </AppShell>
