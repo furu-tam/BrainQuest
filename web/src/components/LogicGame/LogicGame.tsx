@@ -35,10 +35,20 @@ export function LogicGame({ question, questionLabel, onAnswer }: LogicGameProps)
       <p className="mb-5 text-center text-sm text-bq-muted">
         {questionLabel} · {DIFFICULTY_LABEL[question.difficulty]}
       </p>
-      <div className="mb-6 rounded-bq bg-white p-6 text-center text-2xl leading-relaxed shadow-bq">
-        {question.comparisons.map((c, i) => (
-          <div key={i}>{c.replace(">", " › ")}</div>
-        ))}
+      <div className="mb-6 rounded-bq bg-white p-6 text-center shadow-bq">
+        {question.comparisons.map((c, i) => {
+          const [left, right] = c.split(">").map((s) => s.trim());
+          return (
+            <div
+              key={i}
+              className="flex items-center justify-center gap-3 py-2 text-4xl leading-none"
+            >
+              <span>{left}</span>
+              <span className="text-5xl font-extrabold text-bq-primary">&gt;</span>
+              <span>{right}</span>
+            </div>
+          );
+        })}
       </div>
       <p className="mb-5 text-center text-lg font-extrabold">{question.promptText}</p>
       <div className="mt-auto grid grid-cols-3 gap-3">
