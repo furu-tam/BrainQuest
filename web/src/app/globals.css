@@ -42,3 +42,241 @@ body {
 .phone-frame {
   box-shadow: var(--shadow-bq), 0 0 0 4px #fff;
 }
+
+/* Tower fall animation */
+.tower-fall-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 28px;
+}
+
+.tower-fall-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  animation: tower-fade-in 0.25s ease;
+}
+
+.tower-fall-scene {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 24px 20px;
+  text-align: center;
+  animation: tower-pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tower-fall-title {
+  margin: 0 0 12px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.tower-fall-sub {
+  margin: 14px 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffeaa7;
+}
+
+.tower-fall-stage {
+  position: relative;
+  height: 320px;
+  margin: 0 auto;
+  max-width: 260px;
+}
+
+.tower-fall-cloud {
+  position: absolute;
+  font-size: 1.75rem;
+  opacity: 0.85;
+  animation: tower-cloud-drift 2.4s ease-in-out infinite;
+}
+
+.tower-fall-cloud-left {
+  top: 8%;
+  left: 0;
+}
+
+.tower-fall-cloud-right {
+  top: 14%;
+  right: 0;
+  animation-delay: 0.4s;
+}
+
+.tower-fall-building {
+  position: absolute;
+  left: 50%;
+  bottom: 72px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 4px;
+  width: 120px;
+}
+
+.tower-fall-step {
+  height: 22px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #a29bfe, #6c5ce7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 0 #5b4cdb;
+}
+
+.tower-fall-step-active {
+  background: linear-gradient(90deg, #fdcb6e, #ff9f43);
+  box-shadow: 0 0 0 3px #fff, 0 2px 0 #e17055;
+}
+
+.tower-fall-avatar {
+  position: absolute;
+  left: 50%;
+  top: var(--fall-start);
+  transform: translateX(-50%);
+  animation: tower-avatar-fall 1.8s cubic-bezier(0.55, 0.06, 0.68, 0.99) 0.35s forwards;
+  z-index: 5;
+}
+
+.tower-fall-avatar-icon {
+  display: block;
+  font-size: 3.5rem;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
+  animation: tower-avatar-spin 1.8s ease-in 0.35s;
+}
+
+.tower-fall-avatar-trail {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  font-size: 1.25rem;
+  opacity: 0;
+  animation: tower-trail 1.8s ease 0.35s;
+}
+
+.tower-fall-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: linear-gradient(180deg, #55efc4 0%, #00b894 100%);
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 1.5rem;
+  box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.35);
+}
+
+.tower-fall-ground-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.tower-fall-ground::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  animation: tower-ground-hit 0.4s ease 2.1s;
+}
+
+@keyframes tower-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tower-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes tower-cloud-drift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(8px);
+  }
+}
+
+@keyframes tower-avatar-fall {
+  0% {
+    top: var(--fall-start);
+    transform: translateX(-50%) rotate(0deg);
+  }
+  75% {
+    top: calc(var(--fall-end) - 8px);
+    transform: translateX(-50%) rotate(18deg);
+  }
+  88% {
+    top: calc(var(--fall-end) + 6px);
+    transform: translateX(-50%) rotate(-8deg);
+  }
+  100% {
+    top: var(--fall-end);
+    transform: translateX(-50%) rotate(0deg);
+  }
+}
+
+@keyframes tower-avatar-spin {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.08);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes tower-trail {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(120px);
+  }
+}
+
+@keyframes tower-ground-hit {
+  0%,
+  100% {
+    box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.35);
+  }
+  50% {
+    box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.35), 0 0 0 8px rgba(255, 255, 255, 0.35);
+  }
+}
