@@ -1,65 +1,123 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { useEffect } from "react";
+import { AppShell } from "@/components/ui/AppShell";
+import { ProfileBadge } from "@/components/ui/ProfileBadge";
+import { VoiceToggle } from "@/components/ui/VoiceToggle";
+import { getPathRecommendation } from "@/services/learningPath";
+import {
+  DAILY_MISSION_TOTAL,
+  dailyTotalProgress,
+  useAppStore,
+} from "@/store/appStore";
+
+export default function HomePage() {
+  const profile = useAppStore((s) => s.getActiveProfile());
+  const resetDailyIfNewDay = useAppStore((s) => s.resetDailyIfNewDay);
+
+  useEffect(() => {
+    resetDailyIfNewDay();
+  }, [resetDailyIfNewDay]);
+
+  const { xp, coins, level, streak, dailyProgress, dailyComplete } = profile;
+  const done = dailyTotalProgress(dailyProgress);
+  const pct = Math.round((done / DAILY_MISSION_TOTAL) * 100);
+  const recommendation = getPathRecommendation(profile);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="page-wrap">
+      <AppShell activeNav="home">
+        <main className="flex flex-1 flex-col px-4 py-5">
+          <div className="mb-3 flex items-center justify-between">
+            <ProfileBadge />
+            <VoiceToggle />
+          </div>
+
+          <header className="mb-5 text-center">
+            <h1 className="flex items-center justify-center gap-2 text-3xl font-extrabold text-bq-primary">
+              <span>🧠</span> BrainQuest
+            </h1>
+            <p className="mt-1 text-sm text-bq-muted">5 phút mỗi ngày — tiến bộ từng chút!</p>
+          </header>
+
+          <div className="mb-4 grid grid-cols-3 gap-2">
+            {[
+              { label: "Level", value: level },
+              { label: "XP", value: xp },
+              { label: "Coins", value: coins },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className="rounded-bq-sm bg-white py-3 text-center shadow-sm"
+              >
+                <div className="text-[0.65rem] font-bold uppercase tracking-wide text-bq-muted">
+                  {s.label}
+                </div>
+                <div className="text-xl font-extrabold text-bq-primary">{s.value}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mb-4 flex items-center justify-center gap-2 rounded-bq bg-gradient-to-r from-bq-accent to-amber-300 py-3.5 font-extrabold text-white shadow-orange">
+            <span className="text-2xl">🔥</span>
+            <span>{streak} ngày liên tiếp!</span>
+          </div>
+
+          <div className="mb-4 rounded-bq-sm bg-indigo-50 px-3 py-2 text-sm font-semibold text-bq-primary">
+            🎯 {recommendation}
+          </div>
+
+          <div className="mb-5">
+            <div className="mb-2 flex justify-between text-sm font-bold">
+              <span>Thử thách hôm nay</span>
+              <span>
+                {done}/{DAILY_MISSION_TOTAL}
+              </span>
+            </div>
+            <div className="h-3.5 overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-teal-400 to-bq-success transition-all"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="mb-5 flex flex-col gap-3">
+            {[
+              { icon: "🔴🔵", title: "Nhận diện quy luật", sub: `${dailyProgress.pattern}/2 câu` },
+              { icon: "🐶🐱", title: "Ghi nhớ", sub: `${dailyProgress.memory}/2 câu` },
+              { icon: "🐘🐶", title: "Suy luận logic", sub: `${dailyProgress.logic}/1 câu` },
+            ].map((m) => (
+              <div
+                key={m.title}
+                className="flex items-center gap-3 rounded-bq-sm bg-white p-3.5 shadow-sm"
+              >
+                <span className="flex h-13 w-13 items-center justify-center rounded-xl bg-amber-100 text-2xl">
+                  {m.icon}
+                </span>
+                <div>
+                  <h3 className="font-extrabold">{m.title}</h3>
+                  <p className="text-sm text-bq-muted">{m.sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {dailyComplete ? (
+            <div className="mt-auto rounded-bq bg-green-100 py-4 text-center font-extrabold text-bq-success">
+              ✅ Đã hoàn thành hôm nay!
+            </div>
+          ) : (
+            <Link
+              href="/play"
+              className="mt-auto flex min-h-[72px] items-center justify-center rounded-bq bg-gradient-to-br from-bq-primary to-indigo-400 text-xl font-extrabold text-white shadow-purple active:scale-[0.97]"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+              ▶ PLAY TODAY
+            </Link>
+          )}
+        </main>
+      </AppShell>
     </div>
   );
 }
