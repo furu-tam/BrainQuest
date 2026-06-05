@@ -8,10 +8,12 @@ const nunito = Nunito({
   variable: "--font-nunito",
 });
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export const metadata: Metadata = {
   title: "BrainQuest Kids",
   description: "Luyện tư duy 5 phút mỗi ngày cho trẻ 3-10 tuổi",
-  manifest: "/manifest.json",
+  manifest: `${basePath}/manifest.json`,
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
