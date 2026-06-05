@@ -3,7 +3,7 @@
 import { AppShell } from "@/components/ui/AppShell";
 import { ACHIEVEMENTS, getUnlockedAchievements } from "@/utils/achievements";
 import { computeSkillScores, weeklyActivity } from "@/utils/skillStats";
-import { useAppStore } from "@/store/appStore";
+import { useActiveProfile } from "@/hooks/useActiveProfile";
 import { DIFFICULTY_LABEL } from "@/types/question";
 
 const SKILL_COLORS = {
@@ -21,7 +21,7 @@ const SKILL_LABELS = {
 const DAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
 export default function DashboardPage() {
-  const profile = useAppStore((s) => s.getActiveProfile());
+  const profile = useActiveProfile();
   const scores = computeSkillScores(profile.events);
   const week = weeklyActivity(profile.events);
   const unlocked = getUnlockedAchievements(

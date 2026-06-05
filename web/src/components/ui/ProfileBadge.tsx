@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useAppStore } from "@/store/appStore";
+import { useActiveProfile } from "@/hooks/useActiveProfile";
 
 export function ProfileBadge() {
-  const profile = useAppStore((s) => s.getActiveProfile());
+  const profile = useActiveProfile();
 
   return (
     <Link

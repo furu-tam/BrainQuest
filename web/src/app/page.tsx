@@ -6,6 +6,7 @@ import { AppShell } from "@/components/ui/AppShell";
 import { ProfileBadge } from "@/components/ui/ProfileBadge";
 import { VoiceToggle } from "@/components/ui/VoiceToggle";
 import { getPathRecommendation } from "@/services/learningPath";
+import { useActiveProfile } from "@/hooks/useActiveProfile";
 import {
   DAILY_MISSION_TOTAL,
   dailyTotalProgress,
@@ -13,7 +14,7 @@ import {
 } from "@/store/appStore";
 
 export default function HomePage() {
-  const profile = useAppStore((s) => s.getActiveProfile());
+  const profile = useActiveProfile();
   const resetDailyIfNewDay = useAppStore((s) => s.resetDailyIfNewDay);
 
   useEffect(() => {

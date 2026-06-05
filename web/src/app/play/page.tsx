@@ -11,6 +11,7 @@ import { trackEvent } from "@/services/analytics";
 import { buildLearningPath, type PathStep } from "@/services/learningPath";
 import { generateQuestionWithAI } from "@/services/questionGenerator";
 import { VOICE_PROMPTS } from "@/services/voice";
+import { useActiveProfile } from "@/hooks/useActiveProfile";
 import { useAppStore } from "@/store/appStore";
 import { useVoice } from "@/hooks/useVoice";
 import type { Question } from "@/types/question";
@@ -18,7 +19,7 @@ import type { Question } from "@/types/question";
 export default function PlayPage() {
   const router = useRouter();
   const { speak } = useVoice();
-  const profile = useAppStore((s) => s.getActiveProfile());
+  const profile = useActiveProfile();
   const startSession = useAppStore((s) => s.startSession);
   const recordAnswer = useAppStore((s) => s.recordAnswer);
   const completeDaily = useAppStore((s) => s.completeDaily);

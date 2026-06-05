@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { AppShell } from "@/components/ui/AppShell";
+import { useActiveProfile } from "@/hooks/useActiveProfile";
 import { useAppStore } from "@/store/appStore";
 
 export default function RewardPage() {
   const bonus = useAppStore((s) => s.lastSessionBonus);
-  const profile = useAppStore((s) => s.getActiveProfile());
+  const profile = useActiveProfile();
 
   return (
     <div className="page-wrap">

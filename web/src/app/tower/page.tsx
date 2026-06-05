@@ -9,6 +9,7 @@ import { AppShell } from "@/components/ui/AppShell";
 import { VoiceToggle } from "@/components/ui/VoiceToggle";
 import { trackEvent } from "@/services/analytics";
 import { generateQuestionWithAI } from "@/services/questionGenerator";
+import { useActiveProfile } from "@/hooks/useActiveProfile";
 import { useAppStore } from "@/store/appStore";
 import type { Difficulty, GameType, Question } from "@/types/question";
 
@@ -24,7 +25,7 @@ function difficultyByFloor(floor: number): Difficulty {
 }
 
 export default function TowerPage() {
-  const profile = useAppStore((s) => s.getActiveProfile());
+  const profile = useActiveProfile();
   const startSession = useAppStore((s) => s.startSession);
   const recordTowerAnswer = useAppStore((s) => s.recordTowerAnswer);
   const [question, setQuestion] = useState<Question | null>(null);

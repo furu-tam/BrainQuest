@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { setVoiceEnabled, speak } from "@/services/voice";
 import { useAppStore } from "@/store/appStore";
 
@@ -23,9 +23,16 @@ export function useVoice() {
     [voiceEnabled]
   );
 
+  const speakRef = useRef(speakIfEnabled);
+  speakRef.current = speakIfEnabled;
+
+  const stableSpeak = useCallback((text: string) => {
+    speakRef.current(text);
+  }, []);
+
   return {
     voiceEnabled,
     setVoiceEnabled: toggle,
-    speak: speakIfEnabled,
+    speak: stableSpeak,
   };
 }

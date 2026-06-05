@@ -48,8 +48,19 @@ function levelFromXp(xp: number) {
   return Math.floor(xp / 100) + 1;
 }
 
+function isProfileComplete(profile: ChildProfile): boolean {
+  return (
+    Array.isArray(profile.todayWrongQuestions) &&
+    Array.isArray(profile.towerConqueredFloors) &&
+    typeof profile.towerCurrentFloor === "number" &&
+    typeof profile.towerBestFloor === "number"
+  );
+}
+
 /** Bổ sung field mặc định cho profile cũ trong localStorage */
-function normalizeProfile(profile: ChildProfile): ChildProfile {
+export function normalizeProfile(profile: ChildProfile): ChildProfile {
+  if (isProfileComplete(profile)) return profile;
+
   const age = profile.age ?? 6;
   const diff = initialDifficultyForAge(age);
   return {
@@ -69,6 +80,10 @@ function normalizeProfile(profile: ChildProfile): ChildProfile {
       logic: diff,
     },
   };
+}
+
+function normalizeProfiles(profiles: ChildProfile[]): ChildProfile[] {
+  return profiles.map(normalizeProfile);
 }
 
 function createDefaultProfile(name = "Bé Minh", age = 6): ChildProfile {
@@ -162,10 +177,10 @@ export const useAppStore = create<AppState>()(
 
         getActiveProfile: () => {
           const state = get();
-          const raw =
+          return (
             state.profiles.find((p) => p.id === state.activeProfileId) ??
-            state.profiles[0];
-          return normalizeProfile(raw);
+            state.profiles[0]
+          );
         },
 
         addProfile: (name, age, avatar) => {
@@ -374,18 +389,19 @@ export const useAppStore = create<AppState>()(
       name: "brainquest-v2",
       version: 2,
       migrate: (persisted) => {
-        const state = persisted as AppState;
+        const state = persisted as { profiles?: ChildProfile[] };
         return {
-          ...state,
-          profiles: (state.profiles ?? []).map((p) => normalizeProfile(p)),
+          ...(persisted as object),
+          profiles: normalizeProfiles(state.profiles ?? []),
         };
       },
-      merge: (persisted, current) => {
-        const merged = { ...current, ...(persisted as object) } as AppState;
-        return {
-          ...merged,
-          profiles: (merged.profiles ?? []).map((p) => normalizeProfile(p)),
-        };
+      onRehydrateStorage: () => (state) => {
+        if (!state?.profiles?.length) return;
+        const normalized = normalizeProfiles(state.profiles);
+        const changed = normalized.some((p, i) => p !== state.profiles[i]);
+        if (changed) {
+          useAppStore.setState({ profiles: normalized });
+        }
       },
     }
   )
