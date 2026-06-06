@@ -127,6 +127,22 @@ export default function HomePage() {
             </Link>
           </div>
 
+          <div className="mb-5 rounded-bq-sm bg-white p-3.5 shadow-sm">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="font-extrabold text-bq-primary">📐 MathQuest</h3>
+              <span className="text-sm font-bold text-bq-muted">Ôn Toán</span>
+            </div>
+            <p className="text-sm text-bq-muted">
+              10 câu trắc nghiệm Toán mỗi ngày theo lớp học.
+            </p>
+            <Link
+              href="/math"
+              className="mt-3 flex min-h-[60px] items-center justify-center rounded-bq bg-gradient-to-br from-sky-500 to-blue-400 text-lg font-extrabold text-white"
+            >
+              Thử MathQuest
+            </Link>
+          </div>
+
           <div className="mt-auto flex flex-col gap-3">
             {dailyComplete ? (
               <div className="rounded-bq bg-green-100 py-4 text-center font-extrabold text-bq-success">
