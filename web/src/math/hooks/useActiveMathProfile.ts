@@ -1,11 +1,13 @@
 import { useShallow } from "zustand/react/shallow";
-import { normalizeProfile, useMathStore } from "@/math/store/mathStore";
+import { useMathStore, type StudentProfile } from "@/math/store/mathStore";
 
-export function useActiveMathProfile() {
+/** Profile đang active — tham chiếu ổn định từ store, tránh re-render vô hạn */
+export function useActiveMathProfile(): StudentProfile {
   return useMathStore(
     useShallow((s) => {
-      const p = s.profiles.find((x) => x.id === s.activeProfileId) ?? s.profiles[0];
-      return normalizeProfile(p);
+      const profile =
+        s.profiles.find((p) => p.id === s.activeProfileId) ?? s.profiles[0];
+      return profile;
     })
   );
 }

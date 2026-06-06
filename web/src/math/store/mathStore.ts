@@ -135,8 +135,7 @@ export const useMathStore = create<AppState>()(
 
       getActiveProfile: () => {
         const { profiles, activeProfileId } = get();
-        const p = profiles.find((x) => x.id === activeProfileId) ?? profiles[0];
-        return normalizeProfile(p);
+        return profiles.find((x) => x.id === activeProfileId) ?? profiles[0];
       },
 
       setActiveProfile: (id) => set({ activeProfileId: id }),
@@ -183,7 +182,8 @@ export const useMathStore = create<AppState>()(
       startSession: () => set({ sessionId: crypto.randomUUID() }),
 
       getDifficultyForModule: (module) => {
-        const p = get().getActiveProfile();
+        const { profiles, activeProfileId } = get();
+        const p = profiles.find((x) => x.id === activeProfileId) ?? profiles[0];
         return p.moduleDifficulty[module] ?? initialDifficultyForGrade(p.grade);
       },
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MathQuiz } from "@/math/components/MathQuiz";
 import { MathShell } from "@/math/components/MathShell";
-import { buildDailyExam, type PathStep } from "@/math/services/learningPath";
+import { buildDailyExam } from "@/math/services/learningPath";
 import { generateMathQuestion } from "@/math/services/questionGenerator";
 import { useActiveMathProfile } from "@/math/hooks/useActiveMathProfile";
 import { useMathStore } from "@/math/store/mathStore";
@@ -26,17 +26,18 @@ export default function MathPlayPage() {
   const [stepIndex, setStepIndex] = useState(0);
   const [question, setQuestion] = useState<MathQuestion | null>(null);
 
-  const currentStep: PathStep | undefined = path[stepIndex];
+  const currentStep = path[stepIndex];
+  const currentModule = currentStep?.module;
 
   useEffect(() => {
     startSession();
   }, [startSession]);
 
   useEffect(() => {
-    if (!currentStep) return;
-    const difficulty = getDifficultyForModule(currentStep.module);
-    setQuestion(generateMathQuestion(currentStep.module, difficulty, profile.grade));
-  }, [stepIndex, currentStep, profile.grade, getDifficultyForModule]);
+    if (!currentModule) return;
+    const difficulty = getDifficultyForModule(currentModule);
+    setQuestion(generateMathQuestion(currentModule, difficulty, profile.grade));
+  }, [stepIndex, currentModule, profile.grade, getDifficultyForModule]);
 
   const handleAnswer = useCallback(
     (correct: boolean, responseTime: number) => {
