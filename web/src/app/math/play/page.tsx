@@ -2,42 +2,57 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MathQuiz } from "@/math/components/MathQuiz";
 import { MathShell } from "@/math/components/MathShell";
-import { buildDailyExam } from "@/math/services/learningPath";
+import { getStartStepIndex } from "@/math/services/learningPath";
 import { generateMathQuestion } from "@/math/services/questionGenerator";
 import { useActiveMathProfile } from "@/math/hooks/useActiveMathProfile";
-import { useMathStore } from "@/math/store/mathStore";
+import { dailyTotalProgress, useMathStore } from "@/math/store/mathStore";
+import { DAILY_QUESTION_COUNT } from "@/math/types/curriculum";
 import type { MathQuestion } from "@/math/types/question";
 
 export default function MathPlayPage() {
   const router = useRouter();
   const profile = useActiveMathProfile();
   const startSession = useMathStore((s) => s.startSession);
+  const ensureTodayExam = useMathStore((s) => s.ensureTodayExam);
   const recordAnswer = useMathStore((s) => s.recordAnswer);
   const completeDaily = useMathStore((s) => s.completeDaily);
   const getDifficultyForModule = useMathStore((s) => s.getDifficultyForModule);
 
-  const path = useMemo(
-    () => buildDailyExam(profile),
-    [profile.id, profile.grade, profile.events.length]
-  );
+  const path = profile.todayExamPath ?? [];
   const [stepIndex, setStepIndex] = useState(0);
   const [question, setQuestion] = useState<MathQuestion | null>(null);
+  const [ready, setReady] = useState(false);
+  const initRef = useRef(false);
 
   const currentStep = path[stepIndex];
   const currentModule = currentStep?.module;
 
   useEffect(() => {
     startSession();
-  }, [startSession]);
+    ensureTodayExam();
+  }, [startSession, ensureTodayExam]);
 
   useEffect(() => {
-    if (!currentModule) return;
+    const exam = profile.todayExamPath;
+    if (!exam?.length || initRef.current) return;
+    initRef.current = true;
+    const startAt = getStartStepIndex(exam, profile.dailyProgress);
+    if (startAt >= exam.length || profile.dailyComplete) {
+      router.replace("/math");
+      return;
+    }
+    setStepIndex(startAt);
+    setReady(true);
+  }, [profile.todayExamPath, profile.dailyProgress, profile.dailyComplete, router]);
+
+  useEffect(() => {
+    if (!ready || !currentModule) return;
     const difficulty = getDifficultyForModule(currentModule);
     setQuestion(generateMathQuestion(currentModule, difficulty, profile.grade));
-  }, [stepIndex, currentModule, profile.grade, getDifficultyForModule]);
+  }, [ready, stepIndex, currentModule, profile.grade, getDifficultyForModule]);
 
   const handleAnswer = useCallback(
     (correct: boolean, responseTime: number) => {
@@ -45,8 +60,9 @@ export default function MathPlayPage() {
       recordAnswer(currentStep.module, correct, responseTime, question.difficulty);
 
       setTimeout(() => {
-        if (stepIndex < path.length - 1) {
-          setStepIndex((i) => i + 1);
+        const nextIndex = stepIndex + 1;
+        if (nextIndex < path.length) {
+          setStepIndex(nextIndex);
         } else {
           completeDaily();
           router.push("/math/reward");
@@ -60,6 +76,21 @@ export default function MathPlayPage() {
     ? `Câu ${stepIndex + 1}/${path.length} · ${currentStep.moduleLabel}`
     : "";
 
+  const done = dailyTotalProgress(profile.dailyProgress);
+
+  if (!ready || !path.length) {
+    return (
+      <div className="page-wrap">
+        <MathShell>
+          <main className="flex flex-1 flex-col items-center justify-center gap-3 px-4 py-5">
+            <div className="animate-bounce text-4xl">📐</div>
+            <p className="font-bold text-mq-muted">Đang chuẩn bị đề...</p>
+          </main>
+        </MathShell>
+      </div>
+    );
+  }
+
   return (
     <div className="page-wrap">
       <MathShell>
@@ -67,19 +98,27 @@ export default function MathPlayPage() {
           <Link href="/math" className="mb-3 text-sm font-bold text-mq-muted">
             ← Quay lại
           </Link>
-          {currentStep && (
-            <div className="mb-3 flex items-center gap-2 text-sm font-bold text-mq-muted">
-              <span className="text-xl">{currentStep.moduleIcon}</span>
-              {currentStep.moduleLabel}
-            </div>
-          )}
+          <div className="mb-3 flex justify-between text-xs font-bold text-mq-muted">
+            <span>
+              {currentStep && (
+                <>
+                  <span className="mr-1 text-base">{currentStep.moduleIcon}</span>
+                  {currentStep.moduleLabel}
+                </>
+              )}
+            </span>
+            <span>
+              Hôm nay: {done}/{DAILY_QUESTION_COUNT}
+            </span>
+          </div>
           {!question ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-3">
               <div className="animate-bounce text-4xl">📐</div>
-              <p className="font-bold text-mq-muted">Đang tạo đề...</p>
+              <p className="font-bold text-mq-muted">Đang tạo câu...</p>
             </div>
           ) : (
             <MathQuiz
+              key={`${stepIndex}-${question.promptText}-${question.answer}`}
               question={question}
               questionLabel={questionLabel}
               onAnswer={handleAnswer}

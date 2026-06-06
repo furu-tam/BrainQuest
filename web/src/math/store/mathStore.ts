@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Grade, MathModule } from "@/math/types/curriculum";
-import { getModulesForGrade } from "@/math/types/curriculum";
+import { DAILY_QUESTION_COUNT, getModulesForGrade } from "@/math/types/curriculum";
 import type { Difficulty } from "@/math/types/question";
+import { buildDailyExam, type PathStep } from "@/math/services/learningPath";
 import { initialDifficultyForGrade, nextDifficulty } from "@/math/utils/adaptiveDifficulty";
 
 export interface MathEvent {
@@ -27,6 +28,7 @@ export interface StudentProfile {
   dailyProgress: Record<MathModule, number>;
   dailyComplete: boolean;
   dailyCompleteCount: number;
+  todayExamPath: PathStep[] | null;
   events: MathEvent[];
   moduleDifficulty: Partial<Record<MathModule, Difficulty>>;
 }
@@ -61,6 +63,7 @@ function createDefaultProfile(name = "Học sinh An", grade: Grade = 3): Student
     dailyProgress: emptyDailyProgress(grade),
     dailyComplete: false,
     dailyCompleteCount: 0,
+    todayExamPath: null,
     events: [],
     moduleDifficulty,
   };
@@ -83,6 +86,7 @@ export function normalizeProfile(profile: StudentProfile): StudentProfile {
     dailyProgress,
     dailyComplete: profile.dailyComplete ?? false,
     dailyCompleteCount: profile.dailyCompleteCount ?? 0,
+    todayExamPath: profile.todayExamPath ?? null,
     events: profile.events ?? [],
     moduleDifficulty,
   };
@@ -101,6 +105,7 @@ interface AppState {
   addProfile: (name: string, grade: Grade, avatar: string) => void;
   removeProfile: (id: string) => void;
   startSession: () => void;
+  ensureTodayExam: () => void;
   getDifficultyForModule: (module: MathModule) => Difficulty;
   recordAnswer: (
     module: MathModule,
@@ -148,6 +153,8 @@ export const useMathStore = create<AppState>()(
                   ...p,
                   grade,
                   dailyProgress: emptyDailyProgress(grade),
+                  todayExamPath: null,
+                  dailyComplete: false,
                   moduleDifficulty: Object.fromEntries(
                     getModulesForGrade(grade).map((m) => [
                       m.id,
@@ -181,6 +188,16 @@ export const useMathStore = create<AppState>()(
 
       startSession: () => set({ sessionId: crypto.randomUUID() }),
 
+      ensureTodayExam: () => {
+        const { activeProfileId } = get();
+        set((s) => ({
+          profiles: updateProfileList(s.profiles, activeProfileId, (p) => {
+            if (p.todayExamPath && p.todayExamPath.length > 0) return p;
+            return { ...p, todayExamPath: buildDailyExam(p) };
+          }),
+        }));
+      },
+
       getDifficultyForModule: (module) => {
         const { profiles, activeProfileId } = get();
         const p = profiles.find((x) => x.id === activeProfileId) ?? profiles[0];
@@ -207,9 +224,13 @@ export const useMathStore = create<AppState>()(
               module
             );
             const dailyProgress = { ...p.dailyProgress };
-            dailyProgress[module] = (dailyProgress[module] ?? 0) + 1;
+            const moduleCap =
+              getModulesForGrade(p.grade).find((m) => m.id === module)?.dailyCount ?? 999;
+            dailyProgress[module] = Math.min((dailyProgress[module] ?? 0) + 1, moduleCap);
             const xpGain = correct ? 10 : 2;
             const newXp = p.xp + xpGain;
+            const doneToday = dailyTotalProgress(dailyProgress);
+            const justFinished = !p.dailyComplete && doneToday >= DAILY_QUESTION_COUNT;
 
             return {
               ...p,
@@ -218,6 +239,9 @@ export const useMathStore = create<AppState>()(
               moduleDifficulty: { ...p.moduleDifficulty, [module]: newDiff },
               xp: newXp,
               level: levelFromXp(newXp),
+              dailyComplete: p.dailyComplete || doneToday >= DAILY_QUESTION_COUNT,
+              streak: justFinished ? p.streak + 1 : p.streak,
+              dailyCompleteCount: justFinished ? p.dailyCompleteCount + 1 : p.dailyCompleteCount,
             };
           }),
         }));
@@ -227,15 +251,20 @@ export const useMathStore = create<AppState>()(
         const { activeProfileId } = get();
         set((s) => ({
           lastSessionBonus: { xp: 50, coins: 20 },
-          profiles: updateProfileList(s.profiles, activeProfileId, (p) => ({
-            ...p,
-            dailyComplete: true,
-            dailyCompleteCount: p.dailyCompleteCount + 1,
-            streak: p.streak + 1,
-            xp: p.xp + 50,
-            coins: p.coins + 20,
-            level: levelFromXp(p.xp + 50),
-          })),
+          profiles: updateProfileList(s.profiles, activeProfileId, (p) => {
+            if (p.dailyComplete) {
+              return { ...p, coins: p.coins + 20, xp: p.xp + 50, level: levelFromXp(p.xp + 50) };
+            }
+            return {
+              ...p,
+              dailyComplete: true,
+              dailyCompleteCount: p.dailyCompleteCount + 1,
+              streak: p.streak + 1,
+              xp: p.xp + 50,
+              coins: p.coins + 20,
+              level: levelFromXp(p.xp + 50),
+            };
+          }),
         }));
       },
 
@@ -252,6 +281,7 @@ export const useMathStore = create<AppState>()(
               ...np,
               dailyProgress: emptyDailyProgress(np.grade),
               dailyComplete: false,
+              todayExamPath: null,
             };
           }),
         }));
@@ -262,8 +292,20 @@ export const useMathStore = create<AppState>()(
     }),
     {
       name: "mathquest-v1",
-      version: 1,
-      migrate: (state) => state as AppState,
+      version: 2,
+      migrate: (persisted, version) => {
+        const state = persisted as AppState;
+        if (version < 2) {
+          return {
+            ...state,
+            profiles: state.profiles.map((p) => ({
+              ...p,
+              todayExamPath: (p as StudentProfile).todayExamPath ?? null,
+            })),
+          };
+        }
+        return state;
+      },
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.profiles = state.profiles.map(normalizeProfile);

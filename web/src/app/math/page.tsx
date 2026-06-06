@@ -22,6 +22,7 @@ export default function MathHomePage() {
   const { xp, coins, level, streak, dailyProgress, dailyComplete } = profile;
   const done = dailyTotalProgress(dailyProgress);
   const pct = Math.round((done / DAILY_QUESTION_COUNT) * 100);
+  const allDone = dailyComplete || done >= DAILY_QUESTION_COUNT;
   const recommendation = getPathRecommendation(profile);
   const modules = getModulesForGrade(profile.grade);
 
@@ -117,16 +118,16 @@ export default function MathHomePage() {
           </div>
 
           <div className="mt-auto flex flex-col gap-3">
-            {dailyComplete ? (
+            {allDone ? (
               <div className="rounded-mq bg-green-100 py-4 text-center font-extrabold text-mq-success">
-                ✅ Đã hoàn thành đề hôm nay!
+                ✅ Đã hoàn thành đề hôm nay! ({done}/{DAILY_QUESTION_COUNT})
               </div>
             ) : (
               <Link
                 href="/math/play"
                 className="flex min-h-[72px] items-center justify-center rounded-mq bg-gradient-to-br from-mq-primary to-sky-400 text-xl font-extrabold text-white active:scale-[0.97]"
               >
-                ▶ LÀM BÀI HÔM NAY
+                ▶ LÀM BÀI HÔM NAY ({done}/{DAILY_QUESTION_COUNT})
               </Link>
             )}
           </div>

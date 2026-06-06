@@ -63,6 +63,23 @@ function stepFrom(mod: ModuleInfo, index: number): PathStep {
   };
 }
 
+/** Vị trí câu tiếp theo dựa trên tiến độ module đã lưu */
+export function getStartStepIndex(
+  path: PathStep[],
+  progress: Record<MathModule, number>
+): number {
+  const remaining = { ...progress };
+  for (let i = 0; i < path.length; i++) {
+    const mod = path[i].module;
+    if ((remaining[mod] ?? 0) > 0) {
+      remaining[mod]--;
+    } else {
+      return i;
+    }
+  }
+  return path.length;
+}
+
 export function getPathRecommendation(profile: StudentProfile): string {
   const modules = getModulesForGrade(profile.grade);
   const scores = computeModuleScores(profile.events);

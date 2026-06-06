@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { MathQuestion } from "@/math/types/question";
 import { DIFFICULTY_LABEL } from "@/math/types/question";
 import { MODULE_LABELS } from "@/math/types/curriculum";
@@ -12,8 +12,13 @@ interface MathQuizProps {
 }
 
 export function MathQuiz({ question, questionLabel, onAnswer }: MathQuizProps) {
-  const [start] = useState(() => Date.now());
+  const [start, setStart] = useState(() => Date.now());
   const [picked, setPicked] = useState<string | null>(null);
+
+  useEffect(() => {
+    setStart(Date.now());
+    setPicked(null);
+  }, [question.promptText, question.answer]);
 
   const choose = (opt: string) => {
     if (picked) return;
