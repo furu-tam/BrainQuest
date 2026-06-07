@@ -1,10 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { PatternQuestion } from "@/types/question";
 import { DIFFICULTY_LABEL } from "@/types/question";
 import { useVoice } from "@/hooks/useVoice";
 import { VOICE_PROMPTS } from "@/services/voice";
+
+function shuffleOptions<T>(arr: T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
 
 interface PatternGameProps {
   question: PatternQuestion;
@@ -13,11 +22,21 @@ interface PatternGameProps {
 }
 
 export function PatternGame({ question, questionLabel, onAnswer }: PatternGameProps) {
-  const [start] = useState(() => Date.now());
+  const [start, setStart] = useState(() => Date.now());
   const [picked, setPicked] = useState<string | null>(null);
   const { speak } = useVoice();
 
+  const displayOptions = useMemo(() => {
+    const opts = shuffleOptions(question.options);
+    if (opts.length > 1 && opts[0] === question.answer) {
+      [opts[0], opts[1]] = [opts[1], opts[0]];
+    }
+    return opts;
+  }, [question.options, question.answer]);
+
   useEffect(() => {
+    setStart(Date.now());
+    setPicked(null);
     speak(VOICE_PROMPTS.patternStart);
   }, [question, speak]);
 
@@ -45,9 +64,9 @@ export function PatternGame({ question, questionLabel, onAnswer }: PatternGamePr
       </div>
       <p className="mb-4 text-center text-sm text-bq-muted">Chọn hình tiếp theo</p>
       <div className="mt-auto grid grid-cols-3 gap-3">
-        {question.options.map((opt) => (
+        {displayOptions.map((opt, i) => (
           <button
-            key={opt}
+            key={`${opt}-${i}`}
             type="button"
             onClick={() => choose(opt)}
             className={`min-h-[60px] min-w-[60px] rounded-bq-sm text-4xl shadow-sm transition ${

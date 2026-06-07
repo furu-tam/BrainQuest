@@ -42,19 +42,33 @@ function buildPatternUnit(difficulty: Difficulty): string[] {
   return [a, b, b, c];
 }
 
+function buildShuffledOptions(answer: string, distractors: string[]): string[] {
+  const options = shuffle([answer, ...distractors]);
+  if (options.length > 1 && options[0] === answer) {
+    const swapWith = 1 + Math.floor(Math.random() * (options.length - 1));
+    [options[0], options[swapWith]] = [options[swapWith], options[0]];
+  }
+  return options;
+}
+
 function generatePattern(difficulty: Difficulty, age: number): PatternQuestion {
   const unit = buildPatternUnit(difficulty);
-  const repeats = difficulty === 1 ? 2 : 2;
-  const sequence: string[] = [];
-  for (let i = 0; i < repeats; i++) sequence.push(...unit);
-  const answer = unit[sequence.length % unit.length];
+  const pool: string[] = [];
+  while (pool.length < unit.length * 3) pool.push(...unit);
 
-  const shownItems = [...new Set(sequence)];
+  // Cắt giữa chu kỳ để đáp án không luôn trùng icon đầu tiên
+  const minLen = unit.length + 1;
+  const maxLen = unit.length * 2 - 1;
+  const showLen = minLen + Math.floor(Math.random() * (maxLen - minLen + 1));
+  const sequence = pool.slice(0, showLen);
+  const answer = pool[showLen];
+
+  const shownItems = [...new Set([...sequence, answer])];
   const distractors = pickRandom(
     shownItems.filter((s) => s !== answer),
     Math.min(2, shownItems.length - 1)
   );
-  const options = shuffle([answer, ...distractors]);
+  const options = buildShuffledOptions(answer, distractors);
 
   return {
     type: "pattern",
