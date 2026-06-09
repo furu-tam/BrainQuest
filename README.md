@@ -8,8 +8,7 @@
 dailyQuest/
 ├── specs              # MVP specification
 ├── mockup/            # HTML + CSS mockup (6 màn hình)
-├── web/               # BrainQuest — luyện tư duy (Next.js)
-└── math-web/          # MathQuest — ôn luyện Toán (Next.js)
+└── web/               # BrainQuest — luyện tư duy (Next.js)
     └── src/
         ├── components/   # PatternGame, MemoryGame, LogicGame
         ├── services/     # questionGenerator, learningPath, voice, analytics
@@ -18,6 +17,8 @@ dailyQuest/
         └── hooks/        # useVoice
 ```
 
+**Ôn luyện Toán** đã tách sang repo riêng: [github.com/furu-tam/hoche](https://github.com/furu-tam/hoche) (`/math` trong BrainQuest vẫn là bản demo tích hợp).
+
 ## Chạy app
 
 **BrainQuest (tư duy):**
@@ -25,9 +26,9 @@ dailyQuest/
 cd web && npm install && npm run dev
 ```
 
-**MathQuest (ôn Toán):**
+**Học Hè (ôn Toán — repo riêng):**
 ```bash
-cd math-web && npm install && npm run dev
+git clone https://github.com/furu-tam/hoche.git && cd hoche && npm install && npm run dev
 ```
 
 http://localhost:3000
